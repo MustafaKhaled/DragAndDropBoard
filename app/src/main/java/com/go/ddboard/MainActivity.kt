@@ -26,9 +26,10 @@ class MainActivity : ComponentActivity() {
             DDBoardTheme {
                 val todo = viewModel.uiState.collectAsState(MainViewModel.UiState.Loading)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    DragAndDropCompose(todo.value, onTicketDropped = { boardTicket, type->
-                        viewModel.move(boardTicket,type)
-                    })
+                    DragAndDropCompose(todo.value, onTicketDropped = { boardTicket, type ->
+                        viewModel.move(boardTicket, to = type)
+                    },
+                        onNewTicketSubmitted = { viewModel.add(it) })
                 }
             }
         }
@@ -40,6 +41,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun DragAndDropPreview() {
     DDBoardTheme {
-        DragAndDropCompose(MainViewModel.UiState.Loading) { _, _ -> {} }
+        DragAndDropCompose(MainViewModel.UiState.Loading, onNewTicketSubmitted = {}) { _, _ -> {} }
     }
 }

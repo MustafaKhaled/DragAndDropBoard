@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">D&amp;DBoard</string>
+    <string name="todo_column_title">TODO</string>
+    <string name="in_progress_column_title">IN PROGRESS</string>
+    <string name="done_column_title">DONE</string>
+
 </resources>
