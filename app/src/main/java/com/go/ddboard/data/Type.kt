@@ -1,10 +1,10 @@
 package com.go.ddboard.data
 
-sealed class Type {
-    data object TODO : Type()
-    data object IN_PROGRESS : Type()
+sealed class Type(val name: String) {
+    data object TODO : Type("TODO")
+    data object IN_PROGRESS : Type("In Progress")
 
-    data object DONE : Type()
+    data object DONE : Type("Done")
 
     fun String.toType() =
         when (this) {
