@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
 
-    private val _listOne = MutableStateFlow(listOf(BoardTicket("test ticket", type = Type.TODO),BoardTicket("test ticket", type =  Type.TODO)))
+    private val _listOne = MutableStateFlow<List<BoardTicket>>(emptyList())
     private val _listTwo = MutableStateFlow<List<BoardTicket>>(emptyList())
     private val _listThree = MutableStateFlow<List<BoardTicket>>(emptyList())
 

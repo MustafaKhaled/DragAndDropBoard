@@ -52,6 +52,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,6 +74,8 @@ import com.go.ddboard.R
 import com.go.ddboard.data.Type
 import com.go.ddboard.data.Type.IN_PROGRESS.toType
 import com.go.ddboard.ui.MainViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun DragAndDropCompose(
@@ -82,10 +85,10 @@ fun DragAndDropCompose(
     onDeleteConfirmed: (MainViewModel.BoardTicket) -> Unit,
     onTicketDropped: (MainViewModel.BoardTicket, Type) -> Unit
 ) {
-    val showAddTicketDialog = remember { mutableStateOf(false) }
     when (uiState) {
         is MainViewModel.UiState.Success -> {
 
+            var showAddTicketDialog by remember { mutableStateOf(false) }
 
             Box(modifier = modifier.fillMaxSize()) {
                 Row(
@@ -130,7 +133,7 @@ fun DragAndDropCompose(
                         .padding(8.dp)
                         .align(Alignment.BottomEnd),
                     onClick = {
-                        showAddTicketDialog.value = true
+                        showAddTicketDialog = true
                     },
                     elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
                 ) {
@@ -140,13 +143,13 @@ fun DragAndDropCompose(
 
 
             InputDialog(
-                showDialog = showAddTicketDialog.value,
+                showDialog = showAddTicketDialog,
                 estimationsList = uiState.list.estimations,
                 tagsList = uiState.list.tags,
                 onNewTicketSubmitted = {
                     onNewTicketSubmitted(it)
                 },
-                onDismiss = { showAddTicketDialog.value = false }
+                onDismiss = { showAddTicketDialog = false }
             )
         }
 
@@ -367,10 +370,11 @@ fun InputDialog(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val sheetState = rememberModalBottomSheetState()
-    var text by remember { mutableStateOf("") }
-    val selectedEstimationIndex = remember { mutableIntStateOf(-1) }
+    val scope = rememberCoroutineScope()
+    var text by remember(sheetState.isVisible) { mutableStateOf("") }
+    val selectedEstimationIndex = remember(sheetState.isVisible) { mutableIntStateOf(-1) }
     val textError = remember { mutableStateOf(false) }
-    val selectedTagIndex = remember { mutableIntStateOf(-1) }
+    val selectedTagIndex = remember(sheetState.isVisible) { mutableIntStateOf(-1) }
     var supportTextColor by remember { mutableStateOf(colorScheme.onSurface) }
     var estimationError by remember { mutableStateOf(false) }
     var tagError by remember { mutableStateOf(false) }
@@ -450,6 +454,14 @@ fun InputDialog(
                         estimationError = selectedEstimationIndex.intValue == -1
                         tagError = selectedTagIndex.intValue == -1
                         return@Button
+                    }
+                    scope.launch {
+                        sheetState.hide()
+
+                    }.invokeOnCompletion {
+                        if (!sheetState.isVisible) {
+                            onDismiss()
+                        }
                     }
                     onNewTicketSubmitted(
                         MainViewModel.BoardTicket(
