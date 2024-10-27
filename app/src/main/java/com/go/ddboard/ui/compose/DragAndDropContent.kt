@@ -84,7 +84,6 @@ fun DragAndDropCompose(
                         modifier = Modifier.weight(1f),
                         list = uiState.list.listOne,
                         type = Type.TODO,
-                        columnTitle = stringResource(id = R.string.todo_column_title),
                         onTicketDropped = onTicketDropped,
                         onDeleteConfirmed = {}
                     )
@@ -93,7 +92,6 @@ fun DragAndDropCompose(
                         modifier = Modifier.weight(1f),
                         list = uiState.list.listTwo,
                         type = Type.IN_PROGRESS,
-                        columnTitle = stringResource(id = R.string.in_progress_column_title),
                         onTicketDropped = onTicketDropped,
                         onDeleteConfirmed = {}
                     )
@@ -103,7 +101,6 @@ fun DragAndDropCompose(
                             .weight(1f),
                         list = uiState.list.listThree,
                         type = Type.DONE,
-                        columnTitle = stringResource(id = R.string.done_column_title),
                         onTicketDropped = onTicketDropped,
                         onDeleteConfirmed = onDeleteConfirmed
                     )
@@ -149,12 +146,10 @@ fun DropBox(
     modifier: Modifier,
     list: List<MainViewModel.BoardTicket>,
     type: Type,
-    columnTitle: String = "",
     onTicketDropped: (MainViewModel.BoardTicket, Type) -> Unit,
     onDeleteConfirmed: (MainViewModel.BoardTicket) -> Unit,
 ) {
     var backgroundColor by remember { mutableStateOf(Color(0xffE5E4E2)) }
-    val isTitleVisible = remember { mutableStateOf(false) }
     val titleStyle = remember { mutableStateOf(FontWeight.Normal) }
     val scale by animateFloatAsState(if (titleStyle.value == FontWeight.Bold) 1.4f else 1f,
         label = "scale"
@@ -238,13 +233,6 @@ fun DropBox(
                 }
             }
         }
-        if (isTitleVisible.value)
-            Text(
-                text = columnTitle,
-                modifier = Modifier.align(Alignment.Center),
-
-                )
-
     }
 }
 
