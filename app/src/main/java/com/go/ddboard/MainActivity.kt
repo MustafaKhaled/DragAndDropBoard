@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.go.ddboard.ui.MainViewModel
+import com.go.ddboard.viewmodel.MainViewModel
 import com.go.ddboard.ui.compose.DragAndDropCompose
 import com.go.ddboard.ui.theme.DDBoardTheme
 

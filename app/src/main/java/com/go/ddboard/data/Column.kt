@@ -1,10 +1,10 @@
 package com.go.ddboard.data
 
-sealed class Type(val name: String) {
-    data object TODO : Type("TODO")
-    data object IN_PROGRESS : Type("In Progress")
+sealed class Column(val name: String) {
+    data object TODO : Column("TODO")
+    data object IN_PROGRESS : Column("In Progress")
 
-    data object DONE : Type("Done")
+    data object DONE : Column("Done")
 
     fun String.toType() =
         when (this) {
@@ -14,4 +14,8 @@ sealed class Type(val name: String) {
             else -> throw IllegalArgumentException("Invalid type: $this")
         }
 
+}
+
+enum class BadgeType {
+    ESTIMATION, TAG
 }

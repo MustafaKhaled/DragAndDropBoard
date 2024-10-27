@@ -13,7 +13,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +29,6 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,9 +55,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.go.ddboard.R
-import com.go.ddboard.data.Type
-import com.go.ddboard.data.Type.IN_PROGRESS.toType
-import com.go.ddboard.ui.MainViewModel
+import com.go.ddboard.data.BadgeType
+import com.go.ddboard.data.Column
+import com.go.ddboard.data.Column.IN_PROGRESS.toType
+import com.go.ddboard.ui.compose.Keys.ARG_ESTIMATION
+import com.go.ddboard.ui.compose.Keys.ARG_TAG
+import com.go.ddboard.ui.compose.Keys.ARG_TEXT
+import com.go.ddboard.ui.compose.Keys.ARG_TYPE
+import com.go.ddboard.viewmodel.MainViewModel
 
 @Composable
 fun DragAndDropCompose(
@@ -67,7 +70,7 @@ fun DragAndDropCompose(
     modifier: Modifier,
     onNewTicketSubmitted: (MainViewModel.BoardTicket) -> Unit,
     onDeleteConfirmed: (MainViewModel.BoardTicket) -> Unit,
-    onTicketDropped: (MainViewModel.BoardTicket, Type) -> Unit
+    onTicketDropped: (MainViewModel.BoardTicket, Column) -> Unit
 ) {
     when (uiState) {
         is MainViewModel.UiState.Success -> {
@@ -83,7 +86,7 @@ fun DragAndDropCompose(
                     DropBox(
                         modifier = Modifier.weight(1f),
                         list = uiState.list.listOne,
-                        type = Type.TODO,
+                        column = Column.TODO,
                         onTicketDropped = onTicketDropped,
                         onDeleteConfirmed = {}
                     )
@@ -91,7 +94,7 @@ fun DragAndDropCompose(
                     DropBox(
                         modifier = Modifier.weight(1f),
                         list = uiState.list.listTwo,
-                        type = Type.IN_PROGRESS,
+                        column = Column.IN_PROGRESS,
                         onTicketDropped = onTicketDropped,
                         onDeleteConfirmed = {}
                     )
@@ -100,7 +103,7 @@ fun DragAndDropCompose(
                         modifier = Modifier
                             .weight(1f),
                         list = uiState.list.listThree,
-                        type = Type.DONE,
+                        column = Column.DONE,
                         onTicketDropped = onTicketDropped,
                         onDeleteConfirmed = onDeleteConfirmed
                     )
@@ -113,8 +116,7 @@ fun DragAndDropCompose(
                         .align(Alignment.BottomEnd),
                     onClick = {
                         showAddTicketDialog = true
-                    },
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 0.dp)
+                    }
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null)
                 }
@@ -140,13 +142,13 @@ fun DragAndDropCompose(
 
 }
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DropBox(
     modifier: Modifier,
     list: List<MainViewModel.BoardTicket>,
-    type: Type,
-    onTicketDropped: (MainViewModel.BoardTicket, Type) -> Unit,
+    column: Column,
+    onTicketDropped: (MainViewModel.BoardTicket, Column) -> Unit,
     onDeleteConfirmed: (MainViewModel.BoardTicket) -> Unit,
 ) {
     var backgroundColor by remember { mutableStateOf(Color(0xffE5E4E2)) }
@@ -160,11 +162,11 @@ fun DropBox(
                 val data = event.toAndroidDragEvent().clipData.getItemAt(0).intent
                 onTicketDropped(
                     MainViewModel.BoardTicket(
-                        text = data.getStringExtra("text") ?: "",
-                        type = data.getStringExtra("type")?.toType() ?: Type.TODO,
-                        estimation = data.getStringExtra("estimation"),
-                        tag = data.getStringExtra("tag")
-                    ), type
+                        text = data.getStringExtra(ARG_TEXT) ?: "",
+                        column = data.getStringExtra(ARG_TYPE)?.toType() ?: Column.TODO,
+                        estimation = data.getStringExtra(ARG_ESTIMATION),
+                        tag = data.getStringExtra(ARG_TAG)
+                    ), column
                 )
                 return true
             }
@@ -211,8 +213,9 @@ fun DropBox(
 
             stickyHeader {
                 Text(
-                    text = type.name,
-                    modifier = Modifier.fillMaxWidth()
+                    text = column.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
                         .graphicsLayer {
                             scaleX = scale
                             scaleY = scale
@@ -253,10 +256,10 @@ fun TicketCard(
                         startTransfer(
                             DragAndDropTransferData(
                                 clipData = ClipData.newIntent("label", Intent().apply {
-                                    putExtra("text", ticket.text)
-                                    putExtra("type", ticket.type.toString())
-                                    putExtra("estimation", ticket.estimation)
-                                    putExtra("tag", ticket.tag)
+                                    putExtra(ARG_TEXT, ticket.text)
+                                    putExtra(ARG_TYPE, ticket.column.toString())
+                                    putExtra(ARG_ESTIMATION, ticket.estimation)
+                                    putExtra(ARG_TAG, ticket.tag)
                                 })
                             )
                         )
@@ -264,10 +267,10 @@ fun TicketCard(
             }),
         shape = CardDefaults.outlinedShape,
         colors = CardDefaults.cardColors(
-            containerColor = when (ticket.type) {
-                Type.IN_PROGRESS -> MaterialTheme.colorScheme.onSecondary
-                Type.DONE -> MaterialTheme.colorScheme.onTertiary
-                Type.TODO -> MaterialTheme.colorScheme.onPrimary
+            containerColor = when (ticket.column) {
+                Column.IN_PROGRESS -> MaterialTheme.colorScheme.onSecondary
+                Column.DONE -> MaterialTheme.colorScheme.onTertiary
+                Column.TODO -> MaterialTheme.colorScheme.onPrimary
             }
         )
     ) {
@@ -283,7 +286,7 @@ fun TicketCard(
                     modifier = Modifier.weight(1f),
                     fontWeight = FontWeight.Bold
                 )
-                if (ticket.type == Type.DONE) {
+                if (ticket.column == Column.DONE) {
                     Icon(
                         Icons.Filled.Delete,
                         contentDescription = null,
@@ -296,16 +299,16 @@ fun TicketCard(
 
             Spacer(modifier = Modifier.height(50.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "Story points: ")
+                Text(text = stringResource(R.string.story_points_label))
                 CardContainer(
                     text = ticket.estimation.toString(),
-                    cardType = MainViewModel.CardType.ESTIMATION
+                    badgeType = BadgeType.ESTIMATION
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
             Row {
-                Text(text = "Tag ")
-                CardContainer(text = ticket.tag.toString(), cardType = MainViewModel.CardType.TAG)
+                Text(text = stringResource(R.string.tag_label))
+                CardContainer(text = ticket.tag.toString(), badgeType = BadgeType.TAG)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -329,7 +332,7 @@ fun TicketCard(
 fun CardContainer(
     text: String,
     isSelected: Boolean? = null,
-    cardType: MainViewModel.CardType,
+    badgeType: BadgeType,
     onClick: () -> Unit = {},
     hasError: Boolean = false
 ) {
@@ -356,13 +359,20 @@ fun CardContainer(
             text = text,
             fontSize = 12.sp,
             modifier = Modifier
-                .adjustedSize(cardType)
+                .adjustedSize(badgeType)
                 .padding(horizontal = 12.dp)
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center
         )
     }
 
+}
+
+object Keys{
+    const val ARG_TEXT = "text"
+    const val ARG_TYPE = "type"
+    const val ARG_ESTIMATION = "estimation"
+    const val ARG_TAG = "tag"
 }
 
 @Preview
@@ -383,7 +393,7 @@ fun TicketCardPreview() {
     TicketCard(
         ticket = MainViewModel.BoardTicket(
             text = "this is just a test title for preview",
-            type = Type.TODO
+            column = Column.TODO
         ),
         onDeleteConfirmed = {}
     )

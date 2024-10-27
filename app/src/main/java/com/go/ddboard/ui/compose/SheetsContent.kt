@@ -31,8 +31,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.go.ddboard.data.Type
-import com.go.ddboard.ui.MainViewModel
+import com.go.ddboard.data.BadgeType
+import com.go.ddboard.data.Column
+import com.go.ddboard.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,7 +136,7 @@ fun InputDialog(
                 SingleSelectionSection(
                     title = "Estimation",
                     list = estimationsList,
-                    cardType = MainViewModel.CardType.ESTIMATION,
+                    badgeType = BadgeType.ESTIMATION,
                     selectedIndex = selectedEstimationIndex.intValue,
                     onItemSelected = {
                         selectedEstimationIndex.intValue = it
@@ -147,7 +148,7 @@ fun InputDialog(
                 SingleSelectionSection(
                     title = "Tags",
                     list = tagsList,
-                    cardType = MainViewModel.CardType.TAG,
+                    badgeType = BadgeType.TAG,
                     selectedIndex = selectedTagIndex.intValue,
                     onItemSelected = {
                         selectedTagIndex.intValue = it
@@ -179,7 +180,7 @@ fun InputDialog(
                             text = text,
                             estimation = estimationsList[selectedEstimationIndex.intValue],
                             tag = tagsList[selectedTagIndex.intValue],
-                            type = Type.TODO
+                            column = Column.TODO
                         )
                     )
 
@@ -199,7 +200,7 @@ private fun SingleSelectionSection(
     title: String,
     list: List<String>,
     selectedIndex: Int,
-    cardType: MainViewModel.CardType,
+    badgeType: BadgeType,
     onItemSelected: (Int) -> Unit = {},
     hasError: Boolean = false
 ) {
@@ -210,7 +211,7 @@ private fun SingleSelectionSection(
                 CardContainer(
                     text = text,
                     isSelected = selectedIndex == index,
-                    cardType = cardType,
+                    badgeType = badgeType,
                     onClick = {
                         onItemSelected(index)
                     },

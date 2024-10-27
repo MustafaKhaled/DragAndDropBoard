@@ -3,5 +3,7 @@
     <string name="todo_column_title">TODO</string>
     <string name="in_progress_column_title">IN PROGRESS</string>
     <string name="done_column_title">DONE</string>
+    <string name="story_points_label">"Story points: "</string>
+    <string name="tag_label">"Tag "</string>
 
 </resources>
