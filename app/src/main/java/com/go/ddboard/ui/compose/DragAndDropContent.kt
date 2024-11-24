@@ -56,24 +56,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.go.ddboard.R
 import com.go.ddboard.data.BadgeType
+import com.go.ddboard.data.BoardTicket
 import com.go.ddboard.data.Column
 import com.go.ddboard.data.Column.IN_PROGRESS.toType
 import com.go.ddboard.ui.compose.Keys.ARG_ESTIMATION
 import com.go.ddboard.ui.compose.Keys.ARG_TAG
 import com.go.ddboard.ui.compose.Keys.ARG_TEXT
 import com.go.ddboard.ui.compose.Keys.ARG_TYPE
-import com.go.ddboard.viewmodel.MainViewModel
+import com.go.ddboard.viewmodel.MainViewModel.*
 
 @Composable
 fun DragAndDropCompose(
-    uiState: MainViewModel.UiState,
+    uiState: UiState,
     modifier: Modifier,
-    onNewTicketSubmitted: (MainViewModel.BoardTicket) -> Unit,
-    onDeleteConfirmed: (MainViewModel.BoardTicket) -> Unit,
-    onTicketDropped: (MainViewModel.BoardTicket, Column) -> Unit
+    onNewTicketSubmitted: (BoardTicket) -> Unit,
+    onDeleteConfirmed: (BoardTicket) -> Unit,
+    onTicketDropped: (BoardTicket, Column) -> Unit
 ) {
     when (uiState) {
-        is MainViewModel.UiState.Success -> {
+        is
+        UiState.Success -> {
             var showAddTicketDialog by remember { mutableStateOf(false) }
             Box(modifier = modifier.fillMaxSize()) {
                 Row(
@@ -83,23 +85,21 @@ fun DragAndDropCompose(
 
                 ) {
 
-                    DropBox(
+                    DragAndDropBox(
                         modifier = Modifier.weight(1f),
                         list = uiState.list.listOne,
                         column = Column.TODO,
                         onTicketDropped = onTicketDropped,
-                        onDeleteConfirmed = {}
                     )
                     VerticalDivider()
-                    DropBox(
+                    DragAndDropBox(
                         modifier = Modifier.weight(1f),
                         list = uiState.list.listTwo,
                         column = Column.IN_PROGRESS,
                         onTicketDropped = onTicketDropped,
-                        onDeleteConfirmed = {}
                     )
                     VerticalDivider()
-                    DropBox(
+                    DragAndDropBox(
                         modifier = Modifier
                             .weight(1f),
                         list = uiState.list.listThree,
@@ -134,7 +134,8 @@ fun DragAndDropCompose(
             )
         }
 
-        is MainViewModel.UiState.Loading -> {
+        is
+        UiState.Loading -> {
 
 
         }
@@ -144,16 +145,17 @@ fun DragAndDropCompose(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun DropBox(
+fun DragAndDropBox(
     modifier: Modifier,
-    list: List<MainViewModel.BoardTicket>,
+    list: List<BoardTicket>,
     column: Column,
-    onTicketDropped: (MainViewModel.BoardTicket, Column) -> Unit,
-    onDeleteConfirmed: (MainViewModel.BoardTicket) -> Unit,
+    onTicketDropped: (BoardTicket, Column) -> Unit,
+    onDeleteConfirmed: (BoardTicket) -> Unit = {},
 ) {
     var backgroundColor by remember { mutableStateOf(Color(0xffE5E4E2)) }
     val titleStyle = remember { mutableStateOf(FontWeight.Normal) }
-    val scale by animateFloatAsState(if (titleStyle.value == FontWeight.Bold) 1.4f else 1f,
+    val scale by animateFloatAsState(
+        if (titleStyle.value == FontWeight.Bold) 1.4f else 1f,
         label = "scale"
     )
     val dragAndDropTarget = remember {
@@ -161,7 +163,7 @@ fun DropBox(
             override fun onDrop(event: DragAndDropEvent): Boolean {
                 val data = event.toAndroidDragEvent().clipData.getItemAt(0).intent
                 onTicketDropped(
-                    MainViewModel.BoardTicket(
+                    BoardTicket(
                         text = data.getStringExtra(ARG_TEXT) ?: "",
                         column = data.getStringExtra(ARG_TYPE)?.toType() ?: Column.TODO,
                         estimation = data.getStringExtra(ARG_ESTIMATION),
@@ -220,8 +222,7 @@ fun DropBox(
                             scaleX = scale
                             scaleY = scale
                             transformOrigin = TransformOrigin.Center
-                        }
-                    ,
+                        },
                     textAlign = TextAlign.Center,
                     fontWeight = titleStyle.value,
                 )
@@ -242,8 +243,11 @@ fun DropBox(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TicketCard(
-    ticket: MainViewModel.BoardTicket,
-    onDeleteConfirmed: (MainViewModel.BoardTicket) -> Unit
+    ticket:
+    BoardTicket,
+    onDeleteConfirmed: (
+        BoardTicket
+    ) -> Unit
 ) {
     val showDeleteTicketDialog = remember { mutableStateOf(false) }
     Card(
@@ -368,7 +372,7 @@ fun CardContainer(
 
 }
 
-object Keys{
+object Keys {
     const val ARG_TEXT = "text"
     const val ARG_TYPE = "type"
     const val ARG_ESTIMATION = "estimation"
@@ -379,7 +383,8 @@ object Keys{
 @Composable
 fun DragAndDropComposePreview() {
     DragAndDropCompose(
-        uiState = MainViewModel.UiState.Loading,
+        uiState =
+        UiState.Loading,
         modifier = Modifier,
         onNewTicketSubmitted = {},
         onTicketDropped = { _, _ -> },
@@ -391,7 +396,8 @@ fun DragAndDropComposePreview() {
 @Composable
 fun TicketCardPreview() {
     TicketCard(
-        ticket = MainViewModel.BoardTicket(
+        ticket =
+        BoardTicket(
             text = "this is just a test title for preview",
             column = Column.TODO
         ),

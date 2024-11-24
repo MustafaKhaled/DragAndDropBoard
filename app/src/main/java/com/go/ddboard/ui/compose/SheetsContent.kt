@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.go.ddboard.data.BadgeType
+import com.go.ddboard.data.BoardTicket
 import com.go.ddboard.data.Column
 import com.go.ddboard.viewmodel.MainViewModel
 import kotlinx.coroutines.launch
@@ -77,7 +78,7 @@ fun InputDialog(
     showDialog: Boolean,
     estimationsList: List<String>,
     tagsList: List<String>,
-    onNewTicketSubmitted: (MainViewModel.BoardTicket) -> Unit,
+    onNewTicketSubmitted: (BoardTicket) -> Unit,
     onDismiss: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -85,11 +86,11 @@ fun InputDialog(
     val scope = rememberCoroutineScope()
     var text by remember(sheetState.isVisible) { mutableStateOf("") }
     val selectedEstimationIndex = remember(sheetState.isVisible) { mutableIntStateOf(-1) }
-    val textError = remember { mutableStateOf(false) }
+    val textError = remember(sheetState.isVisible)  { mutableStateOf(false) }
     val selectedTagIndex = remember(sheetState.isVisible) { mutableIntStateOf(-1) }
     var supportTextColor by remember { mutableStateOf(colorScheme.onSurface) }
-    var estimationError by remember { mutableStateOf(false) }
-    var tagError by remember { mutableStateOf(false) }
+    var estimationError by remember(sheetState.isVisible)  { mutableStateOf(false) }
+    var tagError by remember(sheetState.isVisible)  { mutableStateOf(false) }
     if (showDialog) {
 
         ModalBottomSheet(
@@ -176,7 +177,7 @@ fun InputDialog(
                         }
                     }
                     onNewTicketSubmitted(
-                        MainViewModel.BoardTicket(
+                        BoardTicket(
                             text = text,
                             estimation = estimationsList[selectedEstimationIndex.intValue],
                             tag = tagsList[selectedTagIndex.intValue],

@@ -2,6 +2,7 @@ package com.go.ddboard.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.go.ddboard.data.BoardTicket
 import com.go.ddboard.data.Column
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,12 +56,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             UiState.Success(SuccessState(_listOne.value, _listTwo.value, _listThree.value))
     }
 
-    data class BoardTicket(
-        val text: String,
-        val estimation: String? = null,
-        val tag: String? = null,
-        val column: Column
-    )
+
 
 
     data class SuccessState(
