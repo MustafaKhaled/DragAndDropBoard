@@ -27,8 +27,8 @@ class MainActivity : ComponentActivity() {
                 val uiState = viewModel.uiState.collectAsState(MainViewModel.UiState.Loading)
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     DragAndDropCompose(
-                        uiState = uiState.value,
                         modifier = Modifier.padding(paddingValues = innerPadding),
+                        uiState = uiState.value,
                         onTicketDropped = { boardTicket, type ->
                             viewModel.move(boardTicket = boardTicket, to = type)
                         },
