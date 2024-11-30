@@ -58,12 +58,11 @@ import com.go.ddboard.R
 import com.go.ddboard.data.BadgeType
 import com.go.ddboard.data.BoardTicket
 import com.go.ddboard.data.Column
-import com.go.ddboard.data.Column.IN_PROGRESS.toType
-import com.go.ddboard.ui.compose.Keys.ARG_ESTIMATION
-import com.go.ddboard.ui.compose.Keys.ARG_TAG
-import com.go.ddboard.ui.compose.Keys.ARG_TEXT
-import com.go.ddboard.ui.compose.Keys.ARG_TYPE
-import com.go.ddboard.viewmodel.MainViewModel.*
+import com.go.ddboard.ui.compose.Keys.ARG_TICKET
+import com.go.ddboard.viewmodel.MainViewModel.UiState
+import com.google.gson.Gson
+
+private val gson by lazy { Gson() }
 
 @Composable
 fun DragAndDropCompose(
@@ -162,13 +161,9 @@ fun DragAndDropBox(
         object : DragAndDropTarget {
             override fun onDrop(event: DragAndDropEvent): Boolean {
                 val data = event.toAndroidDragEvent().clipData.getItemAt(0).intent
+                val ticket = gson.fromJson(data.getStringExtra(ARG_TICKET), BoardTicket::class.java)
                 onTicketDropped(
-                    BoardTicket(
-                        text = data.getStringExtra(ARG_TEXT) ?: "",
-                        column = data.getStringExtra(ARG_TYPE)?.toType() ?: Column.TODO,
-                        estimation = data.getStringExtra(ARG_ESTIMATION),
-                        tag = data.getStringExtra(ARG_TAG)
-                    ), column
+                    ticket, column
                 )
                 return true
             }
@@ -215,7 +210,7 @@ fun DragAndDropBox(
 
             stickyHeader {
                 Text(
-                    text = column.name,
+                    text = column.columnName,
                     modifier = Modifier
                         .fillMaxWidth()
                         .graphicsLayer {
@@ -260,10 +255,7 @@ fun TicketCard(
                         startTransfer(
                             DragAndDropTransferData(
                                 clipData = ClipData.newIntent("label", Intent().apply {
-                                    putExtra(ARG_TEXT, ticket.text)
-                                    putExtra(ARG_TYPE, ticket.column.toString())
-                                    putExtra(ARG_ESTIMATION, ticket.estimation)
-                                    putExtra(ARG_TAG, ticket.tag)
+                                    putExtra(ARG_TICKET, gson.toJson(ticket))
                                 })
                             )
                         )
@@ -373,10 +365,7 @@ fun CardContainer(
 }
 
 object Keys {
-    const val ARG_TEXT = "text"
-    const val ARG_TYPE = "type"
-    const val ARG_ESTIMATION = "estimation"
-    const val ARG_TAG = "tag"
+    const val ARG_TICKET = "ticket"
 }
 
 @Preview
