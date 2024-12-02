@@ -1,59 +1,57 @@
 package com.go.ddboard.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.go.ddboard.data.BoardTicket
 import com.go.ddboard.data.Column
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class MainViewModel(application: Application) : AndroidViewModel(application) {
+class MainViewModel : ViewModel() {
 
 
-    private val _listOne = MutableStateFlow<List<BoardTicket>>(emptyList())
-    private val _listTwo = MutableStateFlow<List<BoardTicket>>(emptyList())
-    private val _listThree = MutableStateFlow<List<BoardTicket>>(emptyList())
+    private val todos = MutableStateFlow<List<BoardTicket>>(emptyList())
+    private val inProgress = MutableStateFlow<List<BoardTicket>>(emptyList())
+    private val done = MutableStateFlow<List<BoardTicket>>(emptyList())
 
     private val _uiState = MutableStateFlow<UiState>(
         UiState.Success(
             SuccessState(
-                _listOne.value,
-                _listTwo.value,
-                _listThree.value
+                todos.value,
+                inProgress.value,
+                done.value
             )
         )
     )
     val uiState = _uiState.asStateFlow()
 
 
-    fun move(boardTicket: BoardTicket, to: Column) {
+    fun move(boardTicket: BoardTicket, target: Column) {
         when (boardTicket.column) {
-            Column.DONE -> _listThree.value -= boardTicket
-            Column.IN_PROGRESS -> _listTwo.value -= boardTicket
-            Column.TODO -> _listOne.value -= boardTicket
+            Column.DONE -> done.value -= boardTicket
+            Column.IN_PROGRESS -> inProgress.value -= boardTicket
+            Column.TODO -> todos.value -= boardTicket
         }
-        when (to) {
-            Column.DONE -> _listThree.value += boardTicket.copy(column = to)
-            Column.IN_PROGRESS -> _listTwo.value += boardTicket.copy(column = to)
-            Column.TODO -> _listOne.value += boardTicket.copy(column = to)
+        when (target) {
+            Column.DONE -> done.value += boardTicket.copy(column = target)
+            Column.IN_PROGRESS -> inProgress.value += boardTicket.copy(column = target)
+            Column.TODO -> todos.value += boardTicket.copy(column = target)
         }
-        _uiState.value =
-            UiState.Success(SuccessState(_listOne.value, _listTwo.value, _listThree.value))
+        updateUiState()
     }
 
     fun add(boardTicket: BoardTicket) {
-        _listOne.value += BoardTicket(text = boardTicket.text, estimation = boardTicket.estimation, tag = boardTicket.tag, column =  Column.TODO)
+        todos.value += BoardTicket(text = boardTicket.text, estimation = boardTicket.estimation, tag = boardTicket.tag, column =  Column.TODO)
         updateUiState()
     }
 
     fun delete(boardTicket: BoardTicket) {
-        _listThree.value -= boardTicket
+        done.value -= boardTicket
         updateUiState()
     }
 
     private fun updateUiState() {
         _uiState.value =
-            UiState.Success(SuccessState(_listOne.value, _listTwo.value, _listThree.value))
+            UiState.Success(SuccessState(todos.value, inProgress.value, done.value))
     }
 
 

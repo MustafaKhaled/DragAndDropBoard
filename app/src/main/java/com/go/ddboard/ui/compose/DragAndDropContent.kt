@@ -73,8 +73,7 @@ fun DragAndDropCompose(
     onTicketDropped: (BoardTicket, Column) -> Unit
 ) {
     when (uiState) {
-        is
-        UiState.Success -> {
+        is UiState.Success -> {
             var showAddTicketDialog by remember { mutableStateOf(false) }
             Box(modifier = modifier.fillMaxSize()) {
                 Row(
@@ -133,8 +132,7 @@ fun DragAndDropCompose(
             )
         }
 
-        is
-        UiState.Loading -> {
+        is UiState.Loading -> {
 
 
         }
@@ -176,13 +174,6 @@ fun DragAndDropBox(
 
             override fun onExited(event: DragAndDropEvent) {
                 super.onExited(event)
-                backgroundColor = Color(0xffE5E4E2)
-                titleStyle.value = FontWeight.Normal
-            }
-
-
-            override fun onEnded(event: DragAndDropEvent) {
-                super.onEnded(event)
                 backgroundColor = Color(0xffE5E4E2)
                 titleStyle.value = FontWeight.Normal
             }
@@ -238,11 +229,8 @@ fun DragAndDropBox(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TicketCard(
-    ticket:
-    BoardTicket,
-    onDeleteConfirmed: (
-        BoardTicket
-    ) -> Unit
+    ticket: BoardTicket,
+    onDeleteConfirmed: (BoardTicket) -> Unit
 ) {
     val showDeleteTicketDialog = remember { mutableStateOf(false) }
     Card(
@@ -254,7 +242,7 @@ fun TicketCard(
                     onLongPress = {
                         startTransfer(
                             DragAndDropTransferData(
-                                clipData = ClipData.newIntent("label", Intent().apply {
+                                clipData = ClipData.newIntent("ticket", Intent().apply {
                                     putExtra(ARG_TICKET, gson.toJson(ticket))
                                 })
                             )
@@ -306,7 +294,6 @@ fun TicketCard(
                 Text(text = stringResource(R.string.tag_label))
                 CardContainer(text = ticket.tag.toString(), badgeType = BadgeType.TAG)
             }
-
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -361,7 +348,6 @@ fun CardContainer(
             textAlign = TextAlign.Center
         )
     }
-
 }
 
 object Keys {
@@ -372,8 +358,7 @@ object Keys {
 @Composable
 fun DragAndDropComposePreview() {
     DragAndDropCompose(
-        uiState =
-        UiState.Loading,
+        uiState = UiState.Loading,
         modifier = Modifier,
         onNewTicketSubmitted = {},
         onTicketDropped = { _, _ -> },
@@ -385,8 +370,7 @@ fun DragAndDropComposePreview() {
 @Composable
 fun TicketCardPreview() {
     TicketCard(
-        ticket =
-        BoardTicket(
+        ticket = BoardTicket(
             text = "this is just a test title for preview",
             column = Column.TODO
         ),

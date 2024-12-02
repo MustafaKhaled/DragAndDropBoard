@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(paddingValues = innerPadding),
                         uiState = uiState.value,
                         onTicketDropped = { boardTicket, type ->
-                            viewModel.move(boardTicket = boardTicket, to = type)
+                            viewModel.move(boardTicket = boardTicket, target = type)
                         },
                         onNewTicketSubmitted = { viewModel.add(it) },
                         onDeleteConfirmed = { viewModel.delete(it) }
