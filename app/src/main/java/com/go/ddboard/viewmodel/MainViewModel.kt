@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import com.go.ddboard.data.BoardTicket
 import com.go.ddboard.data.Column
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 
 class MainViewModel : ViewModel() {
 
@@ -13,16 +13,13 @@ class MainViewModel : ViewModel() {
     private val inProgress = MutableStateFlow<List<BoardTicket>>(emptyList())
     private val done = MutableStateFlow<List<BoardTicket>>(emptyList())
 
-    private val _uiState = MutableStateFlow<UiState>(
-        UiState.Success(
-            SuccessState(
-                todos.value,
-                inProgress.value,
-                done.value
-            )
-        )
-    )
-    val uiState = _uiState.asStateFlow()
+    val uiState = combine(
+        todos,
+        inProgress,
+        done
+    ) { todos, inProgress, done ->
+        UiState.Success(SuccessState(todos, inProgress, done))
+    }
 
 
     fun move(boardTicket: BoardTicket, target: Column) {
@@ -36,26 +33,20 @@ class MainViewModel : ViewModel() {
             Column.IN_PROGRESS -> inProgress.value += boardTicket.copy(column = target)
             Column.TODO -> todos.value += boardTicket.copy(column = target)
         }
-        updateUiState()
     }
 
     fun add(boardTicket: BoardTicket) {
-        todos.value += BoardTicket(text = boardTicket.text, estimation = boardTicket.estimation, tag = boardTicket.tag, column =  Column.TODO)
-        updateUiState()
+        todos.value += BoardTicket(
+            text = boardTicket.text,
+            estimation = boardTicket.estimation,
+            tag = boardTicket.tag,
+            column = Column.TODO
+        )
     }
 
     fun delete(boardTicket: BoardTicket) {
         done.value -= boardTicket
-        updateUiState()
     }
-
-    private fun updateUiState() {
-        _uiState.value =
-            UiState.Success(SuccessState(todos.value, inProgress.value, done.value))
-    }
-
-
-
 
     data class SuccessState(
         val listOne: List<BoardTicket>,
